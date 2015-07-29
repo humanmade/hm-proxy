@@ -293,6 +293,9 @@ while [[ $# > 0 ]]; do
 			echo "        run (default)  Connect and keep in foreground"
 			echo "                       (Allows exiting with Ctrl-C)"
 			echo
+			echo "  --github"
+			echo "      Proxy all SSH connections (e.g git@github.com) to GitHub"
+			echo
 			echo "  -r, --region <proxy>"
 			echo "      One of EU/AU/US-WEST/US-EAST"
 			echo "      Default is geolocated from your IP."
@@ -331,6 +334,10 @@ while [[ $# > 0 ]]; do
 
 		--no-service)
 			MAINSERVICE=""
+			;;
+
+		--github)
+			GITHUB="1"
 			;;
 
 		-u|--user)
@@ -414,6 +421,14 @@ enable_proxy_settings() {
 		networksetup -setsocksfirewallproxystate "$MAINSERVICE" on
 		networksetup -setproxybypassdomains "$MAINSERVICE" "*.dev" "*.local" "169.254/16" "localhost"
 	fi
+
+	if [[ ! -z "$GITHUB" ]]; then
+		echo "## <HMProxy>"                                 >> ~/.ssh/config
+		echo "Host github.com"                              >> ~/.ssh/config
+		echo "    User          git"                        >> ~/.ssh/config
+		echo "    ProxyCommand  nc -x localhost:9050 %h %p" >> ~/.ssh/config
+		echo "## </HMProxy>"                                >> ~/.ssh/config
+	fi
 }
 
 disable_proxy_settings() {
@@ -430,6 +445,10 @@ disable_proxy_settings() {
 	if [[ ! -z "$MAINSERVICE" ]]; then
 		echo "Disabling SOCKS for $MAINSERVICE"
 		networksetup -setsocksfirewallproxystate "$MAINSERVICE" off
+	fi
+
+	if [[ ! -z "$GITHUB" ]]; then
+		sed '/## <HMProxy>/,/## <\/HMProxy>/d' ~/.ssh/config > ~/.ssh/config
 	fi
 
 	# Don't run again
