@@ -5,15 +5,6 @@ A super simple script to connect to the closest proxy to you automatically.
 
 Must be run with sudo.
 
-To install:
-* Clone this repo
-* `cd` into the new directory
-* Run `./hmproxy`
-
-To make it available everywhere:
-* `cd` into the `hmproxy` directory
-* `ln -s $PWD/hmproxy /usr/local/bin`
-
 ```
 usage: hmproxy [options] [<command>]
 
@@ -42,6 +33,21 @@ usage: hmproxy [options] [<command>]
       Proxy username
       Default is local username ('root')
 ```
+
+
+## Install
+
+To install:
+* Clone this repo
+* `cd` into the new directory
+* Run `./hmproxy`
+
+To make it available everywhere:
+* `cd` into the `hmproxy` directory
+* `ln -s $PWD/hmproxy /usr/local/bin`
+
+
+# Examples
 
 For example, I run it as follows:
 
