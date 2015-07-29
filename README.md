@@ -50,7 +50,7 @@ To make it available everywhere:
 * `ln -s $PWD/hmproxy /usr/local/bin`
 
 
-# Examples
+## Examples
 
 For example, I run it as follows:
 
@@ -69,9 +69,9 @@ If I'm in a cafe in Berlin, and want to force EU-Central:
 sudo hmproxy -u ryan -p 443 -r eu-central
 ```
 
-# FAQ
+## FAQ
 
-## Why does it pick the wrong service (e.g. Bluetooth instead of Wi-Fi)?
+### Why does it pick the wrong service (e.g. Bluetooth instead of Wi-Fi)?
 
 HM Proxy tries to pick the right service, but it may be picking the wrong one if your system order is set incorrectly.
 
