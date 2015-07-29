@@ -45,3 +45,8 @@ If I'm in a cafe that blocks port 22:
 ```
 sudo hmproxy -u ryan -p 443
 ```
+
+If I'm in a cafe in Berlin, and want to force EU-Central:
+```
+sudo hmproxy -u ryan -p 443 -r eu-central
+```
