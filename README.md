@@ -17,6 +17,9 @@ usage: hmproxy [options] [<command>]
         run (default)  Connect and keep in foreground
                        (Allows exiting with Ctrl-C)
 
+  --github
+      Proxy all SSH connections (e.g git@github.com) to GitHub
+
   -r, --region <proxy>
       One of EU/AU/US-WEST/US-EAST
       Default is geolocated from your IP.
