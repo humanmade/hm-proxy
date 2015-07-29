@@ -1,0 +1,528 @@
+# Ensure we fail by default
+set -e
+
+# Allow extended glob in case
+shopt -s extglob
+
+MAPPING="A1,--
+A2,--
+AD,EU
+AE,AS
+AF,AS
+AG,NA
+AI,NA
+AL,EU
+AM,AS
+AN,NA
+AO,AF
+AP,AS
+AQ,AN
+AR,SA
+AS,OC
+AT,EU
+AU,OC
+AW,NA
+AX,EU
+AZ,AS
+BA,EU
+BB,NA
+BD,AS
+BE,EU
+BF,AF
+BG,EU
+BH,AS
+BI,AF
+BJ,AF
+BL,NA
+BM,NA
+BN,AS
+BO,SA
+BR,SA
+BS,NA
+BT,AS
+BV,AN
+BW,AF
+BY,EU
+BZ,NA
+CA,NA
+CC,AS
+CD,AF
+CF,AF
+CG,AF
+CH,EU
+CI,AF
+CK,OC
+CL,SA
+CM,AF
+CN,AS
+CO,SA
+CR,NA
+CU,NA
+CV,AF
+CX,AS
+CY,AS
+CZ,EU
+DE,EU
+DJ,AF
+DK,EU
+DM,NA
+DO,NA
+DZ,AF
+EC,SA
+EE,EU
+EG,AF
+EH,AF
+ER,AF
+ES,EU
+ET,AF
+EU,EU
+FI,EU
+FJ,OC
+FK,SA
+FM,OC
+FO,EU
+FR,EU
+FX,EU
+GA,AF
+GB,EU
+GD,NA
+GE,AS
+GF,SA
+GG,EU
+GH,AF
+GI,EU
+GL,NA
+GM,AF
+GN,AF
+GP,NA
+GQ,AF
+GR,EU
+GS,AN
+GT,NA
+GU,OC
+GW,AF
+GY,SA
+HK,AS
+HM,AN
+HN,NA
+HR,EU
+HT,NA
+HU,EU
+ID,AS
+IE,EU
+IL,AS
+IM,EU
+IN,AS
+IO,AS
+IQ,AS
+IR,AS
+IS,EU
+IT,EU
+JE,EU
+JM,NA
+JO,AS
+JP,AS
+KE,AF
+KG,AS
+KH,AS
+KI,OC
+KM,AF
+KN,NA
+KP,AS
+KR,AS
+KW,AS
+KY,NA
+KZ,AS
+LA,AS
+LB,AS
+LC,NA
+LI,EU
+LK,AS
+LR,AF
+LS,AF
+LT,EU
+LU,EU
+LV,EU
+LY,AF
+MA,AF
+MC,EU
+MD,EU
+ME,EU
+MF,NA
+MG,AF
+MH,OC
+MK,EU
+ML,AF
+MM,AS
+MN,AS
+MO,AS
+MP,OC
+MQ,NA
+MR,AF
+MS,NA
+MT,EU
+MU,AF
+MV,AS
+MW,AF
+MX,NA
+MY,AS
+MZ,AF
+NA,AF
+NC,OC
+NE,AF
+NF,OC
+NG,AF
+NI,NA
+NL,EU
+NO,EU
+NP,AS
+NR,OC
+NU,OC
+NZ,OC
+O1,--
+OM,AS
+PA,NA
+PE,SA
+PF,OC
+PG,OC
+PH,AS
+PK,AS
+PL,EU
+PM,NA
+PN,OC
+PR,NA
+PS,AS
+PT,EU
+PW,OC
+PY,SA
+QA,AS
+RE,AF
+RO,EU
+RS,EU
+RU,EU
+RW,AF
+SA,AS
+SB,OC
+SC,AF
+SD,AF
+SE,EU
+SG,AS
+SH,AF
+SI,EU
+SJ,EU
+SK,EU
+SL,AF
+SM,EU
+SN,AF
+SO,AF
+SR,SA
+ST,AF
+SV,NA
+SY,AS
+SZ,AF
+TC,NA
+TD,AF
+TF,AN
+TG,AF
+TH,AS
+TJ,AS
+TK,OC
+TL,AS
+TM,AS
+TN,AF
+TO,OC
+TR,EU
+TT,NA
+TV,OC
+TW,AS
+TZ,AF
+UA,EU
+UG,AF
+UM,OC
+US,NA
+UY,SA
+UZ,AS
+VA,EU
+VC,NA
+VE,SA
+VG,NA
+VI,NA
+VN,AS
+VU,OC
+WF,OC
+WS,OC
+YE,AS
+YT,AF
+ZA,AF
+ZM,AF
+ZW,AF"
+
+# Ensure we're running as root
+if [ "$EUID" -ne 0 ]; then
+	echo "hmproxy must be run as root"
+	exit
+fi
+
+PROXYUSER="$USER"
+COMMAND="run"
+
+# Grab the main network service
+MAINSERVICE="$(networksetup -listnetworkserviceorder | grep '(1)' | cut -d ' ' -f 2)"
+
+check_missing_param() {
+	if [[ -z "$1" ]]; then
+		echo "hmproxy: Missing required value for $opt"
+		exit 1
+	fi
+}
+
+while [[ $# > 0 ]]; do
+	opt="$1"
+	shift
+
+	case "$opt" in
+		-h|--help)
+			echo "usage: hmproxy [options] [<command>]"
+			echo
+			echo "  <command>"
+			echo "      One of:"
+			echo "        on             Connect to the proxy connection"
+			echo "        off            Disconnect from the proxy connection"
+			echo "        sh/ssh         Open a shell to the proxy"
+			echo "                       (Reuses the connection; nice and fast!)"
+			echo "        run (default)  Connect and keep in foreground"
+			echo "                       (Allows exiting with Ctrl-C)"
+			echo
+			echo "  -r, --region <proxy>"
+			echo "      One of EU/AU/US-WEST/US-EAST"
+			echo "      Default is geolocated from your IP."
+			echo
+			echo "  -p, --port <port>"
+			echo "      Port to connect to proxy on"
+			echo "      Default is 22, use 443 if proxy is blocked"
+			echo
+			echo "  -s, --service <service>"
+			echo "      Network service to enable the proxy on"
+			echo "      Default is your top enabled network ('$MAINSERVICE')"
+			echo
+			echo "  -u, --user <user>"
+			echo "      Proxy username"
+			echo "      Default is local username ('$USER')"
+			exit
+			;;
+
+		-r|--region)
+			check_missing_param $1;
+			PROXY="$1"
+			shift
+			;;
+
+		-p|--port)
+			check_missing_param $1;
+			PORT="$1"
+			shift
+			;;
+
+		-s|--service)
+			check_missing_param $1;
+			MAINSERVICE="$1"
+			shift
+			;;
+
+		--no-service)
+			MAINSERVICE=""
+			;;
+
+		-u|--user)
+			check_missing_param $1;
+			PROXYUSER="$1"
+			shift
+			;;
+
+		on|off|sh|ssh|status|run)
+			COMMAND="$opt"
+			;;
+
+		*)
+			echo "hmproxy: Unknown option $opt"
+			exit 1
+			;;
+	esac
+done
+
+# Did we get a proxy?
+if [ -z "$PROXY" ]; then
+	# Geolocate!
+	COUNTRY="$(curl -s ipinfo.io/country | tr -d '[:space:]')"
+	CONTINENT=$(echo "$MAPPING" | grep "$COUNTRY," | cut -d "," -f 2 -s)
+
+	case $CONTINENT in
+		AF|AN|EU)
+			# Africa/Antarctica/Europe
+			PROXY="eu-west-1"
+			;;
+
+		AS|OC)
+			PROXY="ap-southeast-2"
+			;;
+
+		NA|SA)
+			PROXY="us-east-1"
+			;;
+
+		*)
+			echo "hmproxy: Could not geolocate, set manually"
+			exit 1
+	esac
+else
+	# Force upper case
+	PROXY="$(echo "$PROXY" | tr '[:lower:]' '[:upper:]')"
+fi
+
+# Grab the correct proxy config
+case $PROXY in
+	EU|eu-west-1)
+		SERVER="eu-west-1.aws.hmn.md"
+		;;
+	EU-CENTRAL|eu-central-1)
+		SERVER="eu-central-1.aws.hmn.md"
+		;;
+	AU|ap-southeast-2)
+		SERVER="ap-southeast-2.aws.hmn.md"
+		;;
+	US-WEST|us-west-1)
+		SERVER="us-west-1.aws.hmn.md"
+		;;
+	US?(-EAST)|us-east-1)
+		SERVER="us-east-1.aws.hmn.md"
+		;;
+	*)
+		echo "hmproxy: invalid proxy type ($PROXY)"
+		exit 1
+esac
+
+# Set the port
+if [ -z "$PORT" ]; then
+	PORT=22
+fi
+
+enable_proxy_settings() {
+	if [[ ! -z "$MAINSERVICE" ]]; then
+		echo "Enabling SOCKS for $MAINSERVICE"
+
+		networksetup -setsocksfirewallproxy "$MAINSERVICE" "127.0.0.1" "9050" off
+		networksetup -setsocksfirewallproxystate "$MAINSERVICE" on
+		networksetup -setproxybypassdomains "$MAINSERVICE" "*.dev" "*.local" "169.254/16" "localhost"
+	fi
+}
+
+disable_proxy_settings() {
+	# Have we already run?
+	if [[ ! -z "$DID_DISABLE" ]]; then
+		return
+	fi
+
+	# Were we disconnected?
+	if [[ $1 == "disconnected" ]]; then
+		osascript -e 'display notification "Proxy disconnected!" with title "HM Proxy"'
+	fi
+
+	if [[ ! -z "$MAINSERVICE" ]]; then
+		echo "Disabling SOCKS for $MAINSERVICE"
+		networksetup -setsocksfirewallproxystate "$MAINSERVICE" off
+	fi
+
+	# Don't run again
+	DID_DISABLE=1
+}
+
+# Check if the proxy is enabled
+# Returns 0 if proxy is enabled or we don't need it, 1 if otherwise
+has_proxy_settings() {
+	if [[ -z "$MAINSERVICE" ]]; then
+		return 0
+	fi
+
+	CURRENTPROXY=$(networksetup -getsocksfirewallproxy "$MAINSERVICE")
+	if ! ( echo "$CURRENTPROXY" | grep -q "Enabled: Yes" ); then
+		return 1
+	fi
+	if ! ( echo "$CURRENTPROXY" | grep -q "Server: 127.0.0.1" ); then
+		return 1
+	fi
+	if ! ( echo "$CURRENTPROXY" | grep -q "Port: 9050" ); then
+		return 1
+	fi
+
+	return 0
+}
+
+PROXYCOMMAND="ssh $PROXYUSER@$SERVER -D 9050 -p $PORT -N -o TCPKeepAlive=yes -o ServerAliveInterval=30"
+CONTROLSOCKET="$HOME/.hmproxy.control"
+
+echo "Connecting to $SERVER (port $PORT)"
+
+case $COMMAND in
+	on)
+		if [[ -e "$CONTROLSOCKET" ]]; then
+			echo "hmproxy: proxy is already running"
+			exit 1
+		fi
+
+		echo "Starting proxy..."
+
+		# -f = background, -M = control master, -S = control socket file
+		$PROXYCOMMAND -f -M -S $CONTROLSOCKET
+
+		# Set up the network settings if we're meant to
+		enable_proxy_settings
+		;;
+
+	off)
+		if [[ ! -e "$CONTROLSOCKET" ]]; then
+			echo "hmproxy: proxy is not currently running"
+			exit 1
+		fi
+
+		# Disable our settings
+		disable_proxy_settings
+
+		# Kill the proxy
+		ssh -S $CONTROLSOCKET -O exit fakehost.example >/dev/null
+		;;
+
+	sh|ssh)
+		# Start a new shell, reusing the same connection
+		ssh -S $CONTROLSOCKET $PROXYUSER@$SERVER
+		;;
+
+	status)
+		if has_proxy_settings; then
+			echo "Connected"
+			exit 0
+		else
+			echo "Disconnected"
+			exit 1
+		fi
+		;;
+
+	run)
+		# Set up the network settings if we're meant to
+		enable_proxy_settings
+
+		# Ensure Ctrl-C is caught
+		trap disable_proxy_settings SIGINT
+
+		# Start the proxy
+		echo "Starting proxy..."
+		$PROXYCOMMAND || true
+
+		# Complete!
+		disable_proxy_settings "disconnected"
+		;;
+
+	*)
+		echo "hmproxy: invalid command"
+		exit 1
+		;;
+esac
