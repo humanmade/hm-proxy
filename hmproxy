@@ -419,7 +419,7 @@ enable_proxy_settings() {
 
 		networksetup -setsocksfirewallproxy "$MAINSERVICE" "127.0.0.1" "9050" off
 		networksetup -setsocksfirewallproxystate "$MAINSERVICE" on
-		networksetup -setproxybypassdomains "$MAINSERVICE" "*.dev" "*.local" "169.254/16" "localhost" "127.0.0.1"
+		networksetup -setproxybypassdomains "$MAINSERVICE" "*.dev" "*.local" "*.wp" "169.254/16" "localhost" "127.0.0.1"
 	fi
 
 	if [[ ! -z "$GITHUB" ]]; then
