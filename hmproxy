@@ -476,7 +476,7 @@ has_proxy_settings() {
 	return 0
 }
 
-PROXYCOMMAND="ssh $PROXYUSER@$SERVER -D 9050 -p $PORT -N -o TCPKeepAlive=yes -o ServerAliveInterval=30"
+PROXYCOMMAND="ssh $PROXYUSER@$SERVER -D 9050 -p $PORT -o TCPKeepAlive=yes -o ServerAliveInterval=30"
 CONTROLSOCKET="$HOME/.hmproxy.control"
 
 echo "Connecting to $SERVER (port $PORT)"
@@ -534,7 +534,7 @@ case $COMMAND in
 
 		# Start the proxy
 		echo "Starting proxy..."
-		$PROXYCOMMAND || true
+		$PROXYCOMMAND 'echo Connected! && cat' || true
 
 		# Complete!
 		disable_proxy_settings "disconnected"
