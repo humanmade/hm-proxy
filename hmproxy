@@ -447,9 +447,7 @@ disable_proxy_settings() {
 		networksetup -setsocksfirewallproxystate "$MAINSERVICE" off
 	fi
 
-	if [[ ! -z "$GITHUB" ]]; then
-		sed '/## <HMProxy>/,/## <\/HMProxy>/d' ~/.ssh/config > ~/.ssh/config
-	fi
+	sed '/## <HMProxy>/,/## <\/HMProxy>/d' ~/.ssh/config > ~/.ssh/config
 
 	# Don't run again
 	DID_DISABLE=1
