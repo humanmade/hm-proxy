@@ -417,9 +417,12 @@ enable_proxy_settings() {
 	if [[ ! -z "$MAINSERVICE" ]]; then
 		echo "Enabling SOCKS for $MAINSERVICE"
 
+		DEFAULT_DOMAINS="*.dev *.local *.wp 169.254/16 localhost 127.0.0.1"
+		BYPASS_DOMAINS=$(networksetup -getproxybypassdomains "$MAINSERVICE")
+
 		networksetup -setsocksfirewallproxy "$MAINSERVICE" "127.0.0.1" "9050" off
 		networksetup -setsocksfirewallproxystate "$MAINSERVICE" on
-		networksetup -setproxybypassdomains "$MAINSERVICE" "*.dev" "*.local" "*.wp" "169.254/16" "localhost" "127.0.0.1"
+		networksetup -setproxybypassdomains "$MAINSERVICE" $(printf "%s\n" $DEFAULT_DOMAINS $BYPASS_DOMAINS | sort -u | tr '\n' ' ')
 	fi
 
 	if [[ ! -z "$GITHUB" ]]; then
