@@ -488,8 +488,8 @@ case $COMMAND in
 
 		echo "Starting proxy..."
 
-		# -f = background, -M = control master, -S = control socket file
-		$PROXYCOMMAND -f -M -S $CONTROLSOCKET
+		# -f = background, -N = do not execute remote command, -M = control master, -S = control socket file
+		$PROXYCOMMAND -f -N -M -S $CONTROLSOCKET
 
 		# Set up the network settings if we're meant to
 		enable_proxy_settings
@@ -532,7 +532,7 @@ case $COMMAND in
 
 		# Start the proxy
 		echo "Starting proxy..."
-		$PROXYCOMMAND 'echo Connected! && cat' || true
+		$PROXYCOMMAND -M -S $CONTROLSOCKET 'echo Connected! && cat' || true
 
 		# Complete!
 		disable_proxy_settings "disconnected"
