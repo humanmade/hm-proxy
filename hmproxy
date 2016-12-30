@@ -267,7 +267,7 @@ PROXYUSER="$USER"
 COMMAND="run"
 
 # Grab the main network service
-MAINSERVICE="$(networksetup -listnetworkserviceorder | grep '(1)' | cut -d ' ' -f 2)"
+MAINSERVICE="$(networksetup -listnetworkserviceorder | grep -m 1 '(1)' | cut -d ' ' -f 2,3,4,5,6,7,8,9,10)"
 
 check_missing_param() {
 	if [[ -z "$1" ]]; then
