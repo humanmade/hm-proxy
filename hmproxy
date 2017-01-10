@@ -297,7 +297,7 @@ while [[ $# > 0 ]]; do
 			echo "      Proxy all SSH connections (e.g git@github.com) to GitHub"
 			echo
 			echo "  -r, --region <proxy>"
-			echo "      One of EU/AU/US-WEST/US-EAST"
+			echo "      One of EU/AU/US-WEST/US-EAST/SG"
 			echo "      Default is geolocated from your IP."
 			echo
 			echo "  -p, --port <port>"
