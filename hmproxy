@@ -401,6 +401,9 @@ case $PROXY in
 	AU|ap-southeast-2)
 		SERVER="ap-southeast-2.aws.hmn.md"
 		;;
+	SG|ap-southeast-1)
+		SERVER="ap-southeast-1.aws.hmn.md"
+		;;
 	US-WEST|us-west-1)
 		SERVER="us-west-1.aws.hmn.md"
 		;;
