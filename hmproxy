@@ -108,7 +108,7 @@ HN,NA
 HR,EU
 HT,NA
 HU,EU
-ID,AS
+ID,SG
 IE,EU
 IL,AS
 IM,EU
@@ -206,7 +206,7 @@ SB,OC
 SC,AF
 SD,AF
 SE,EU
-SG,AS
+SG,SG
 SH,AF
 SI,EU
 SJ,EU
@@ -234,7 +234,7 @@ TO,OC
 TR,EU
 TT,NA
 TV,OC
-TW,AS
+TW,SG
 TZ,AF
 UA,EU
 UG,AF
@@ -367,6 +367,10 @@ if [ -z "$PROXY" ]; then
 		AF|AN|EU)
 			# Africa/Antarctica/Europe
 			PROXY="eu-west-1"
+			;;
+
+		SG)
+			PROXY="ap-southeast-1"
 			;;
 
 		AS|OC)
