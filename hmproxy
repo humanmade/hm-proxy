@@ -84,7 +84,7 @@ FO,EU
 FR,EU
 FX,EU
 GA,AF
-GB,EU
+GB,GB
 GD,NA
 GE,AS
 GF,SA
@@ -297,7 +297,7 @@ while [[ $# > 0 ]]; do
 			echo "      Proxy all SSH connections (e.g git@github.com) to GitHub"
 			echo
 			echo "  -r, --region <proxy>"
-			echo "      One of EU/AU/US-WEST/US-EAST/SG"
+			echo "      One of EU/UK/AU/US-WEST/US-EAST/SG"
 			echo "      Default is geolocated from your IP."
 			echo
 			echo "  -p, --port <port>"
@@ -369,6 +369,11 @@ if [ -z "$PROXY" ]; then
 			PROXY="eu-west-1"
 			;;
 
+		GB)
+			# United Kingdom
+			PROXY="eu-west-2"
+			;;
+
 		SG)
 			PROXY="ap-southeast-1"
 			;;
@@ -394,6 +399,9 @@ fi
 case $PROXY in
 	EU|eu-west-1)
 		SERVER="eu-west-1.aws.hmn.md"
+		;;
+	UK|GB|eu-west-2)
+		SERVER="eu-west-2.aws.hmn.md"
 		;;
 	EU-CENTRAL|eu-central-1)
 		SERVER="eu-central-1.aws.hmn.md"
