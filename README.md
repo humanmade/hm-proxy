@@ -47,8 +47,13 @@ To install:
 
 To make it available everywhere:
 * `cd` into the `hmproxy` directory
-* `ln -s $PWD/hmproxy /usr/local/bin`
+* `ln -s $PWD/hmproxy /usr/local/bin/hmproxy`
 
+If the `/usr/local/bin` directory does not exist yet you can create it first by running the following command:
+
+```
+sudo mkdir /usr/local/bin
+```
 
 ## Examples
 
