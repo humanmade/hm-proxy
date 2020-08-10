@@ -465,7 +465,7 @@ disable_proxy_settings() {
 		networksetup -setsocksfirewallproxystate "$MAINSERVICE" off
 	fi
 
-	sed '/## <HMProxy>/,/## <\/HMProxy>/d' ~/.ssh/config > ~/.ssh/config
+	sed -i '' '/## <HMProxy>/,/## <\/HMProxy>/d' ~/.ssh/config
 
 	# Don't run again
 	DID_DISABLE=1
