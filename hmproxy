@@ -311,6 +311,9 @@ while [[ $# > 0 ]]; do
 			echo "  -u, --user <user>"
 			echo "      Proxy username"
 			echo "      Default is local username ('$USER')"
+			echo
+			echo "  -i <path/to/IdentityFile>"
+			echo "      Custom IdentityFile / Private Key"
 			exit
 			;;
 
@@ -343,6 +346,12 @@ while [[ $# > 0 ]]; do
 		-u|--user)
 			check_missing_param $1;
 			PROXYUSER="$1"
+			shift
+			;;
+
+		-i)
+			check_missing_param $1;
+			IDENTITYFILE="$1"
 			shift
 			;;
 
@@ -493,6 +502,10 @@ has_proxy_settings() {
 }
 
 PROXYCOMMAND="ssh $PROXYUSER@$SERVER -D 9050 -p $PORT -o TCPKeepAlive=yes -o ServerAliveInterval=30"
+if [ ! -z "$IDENTITYFILE" ]; then
+	PROXYCOMMAND="$PROXYCOMMAND -i $IDENTITYFILE"
+fi
+
 CONTROLSOCKET="$HOME/.hmproxy.control"
 
 echo "Connecting to $SERVER (port $PORT)"
