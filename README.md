@@ -35,6 +35,9 @@ usage: hmproxy [options] [<command>]
   -u, --user <user>
       Proxy username
       Default is local username ('root')
+
+  -i <path/to/IdentityFile>
+      Custom IdentityFile / Private Key
 ```
 
 
@@ -72,6 +75,12 @@ sudo hmproxy -u ryan -p 443
 If I'm in a cafe in Berlin, and want to force EU-Central:
 ```
 sudo hmproxy -u ryan -p 443 -r eu-central
+```
+
+If I want to use different private key:
+
+```
+sudo hmproxy -u ryan -i /path/to/custom_id_rsa
 ```
 
 ## FAQ
