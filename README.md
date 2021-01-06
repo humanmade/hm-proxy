@@ -80,6 +80,6 @@ sudo hmproxy -u ryan -p 443 -r eu-central
 
 HM Proxy tries to pick the right service, but it may be picking the wrong one if your system order is set incorrectly.
 
-To fix this, open `System Preferences > Network`, click the gear, and select "Set Service Order..."
+To fix this, open `System Preferences > Network`, click the gear (earlier versions of macOS) or the ellipsis button (Big Sur and above), and select "Set Service Order..."
 
 If you just want to do it for a one-off request, use `-s` or `--service`
